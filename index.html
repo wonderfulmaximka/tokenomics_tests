@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tokenomics Test: $REX | RexHook</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue:#1a56db; --bg:#f8f9fc; --card:#fff; --border:#e2e8f0;
+  --text:#1a202c; --muted:#718096; --red:#e53e3e; --orange:#dd6b20; --green:#38a169;
+  --uni:#ff007a;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  background-image: radial-gradient(circle, #c5d3e8 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--text);
+  padding: 28px 24px;
+}
+.page { max-width: 980px; margin: 0 auto; }
+.page-title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+.page-title span { color: var(--blue); }
+.badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 4px 11px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge-red    { background:#fff5f5; border:1px solid #feb2b2; color:#c53030; }
+.badge-orange { background:#fff3cd; border:1px solid #ffd966; color:#7a5800; }
+.badge-blue   { background:#ebf4ff; border:1px solid #bee3f8; color:#2b6cb0; }
+.badge-green  { background:#f0fff4; border:1px solid #9ae6b4; color:#276749; }
+.badge-pink   { background:#fff0f6; border:1px solid #fbb6ce; color:#97266d; }
+.page-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.section-label { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); padding: 10px 0 8px; }
+
+.top-row { display: grid; grid-template-columns: 200px 1fr 280px; gap: 14px; margin-bottom: 14px; }
+.score-card { padding: 20px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.score-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px; }
+.gauge-wrap { position: relative; width: 170px; height: 95px; }
+.gauge-score { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); text-align: center; white-space: nowrap; }
+.gauge-number { font-family: 'Courier New', monospace; font-size: 32px; font-weight: 500; color: var(--blue); line-height: 1; display: block; }
+.gauge-number sup { font-size: 14px; }
+.rating-badge { display: inline-block; background: var(--blue); color: white; font-size: 12px; font-weight: 700; padding: 2px 12px; border-radius: 5px; margin-top: 4px; }
+.gauge-labels { display: flex; justify-content: space-between; width: 170px; margin-top: 4px; font-size: 10px; color: var(--muted); font-family: 'Courier New', monospace; }
+.radar-card { padding: 10px; display: flex; align-items: center; justify-content: center; }
+.donut-card { padding: 14px; display: flex; gap: 12px; align-items: center; }
+.alloc-legend { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.alloc-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.alloc-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.alloc-label { flex: 1; color: var(--muted); font-size: 11px; white-space: nowrap; }
+.alloc-pct { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 700; color: var(--text); min-width: 38px; text-align: right; }
+
+.unlock-card { padding: 16px 20px; margin-bottom: 14px; }
+.unlock-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+.unlock-bar-wrap { position: relative; height: 32px; background: #f1f5f9; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+.unlock-segment { position: absolute; top: 0; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; overflow: hidden; white-space: nowrap; }
+.unlock-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); }
+.unlock-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; }
+.ul-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); white-space: nowrap; }
+.ul-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+.scores-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 14px; }
+.score-pill { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 6px; text-align: center; }
+.score-pill-label { font-size: 9.5px; color: var(--muted); font-weight: 500; line-height: 1.3; margin-bottom: 4px; }
+.score-pill-value { font-family: 'Courier New', monospace; font-size: 16px; font-weight: 500; }
+.c-red{color:var(--red)} .c-orange{color:var(--orange)} .c-green{color:var(--green)} .c-blue{color:var(--blue)}
+
+.insights-card { padding: 0; overflow: hidden; margin-bottom: 14px; }
+.insight-item { border-bottom: 1px solid var(--border); cursor: pointer; }
+.insight-item:last-child { border-bottom: none; }
+.insight-item:hover { background: #f0f5ff; }
+.insight-header { display: flex; align-items: flex-start; gap: 10px; padding: 13px 18px; user-select: none; }
+.insight-icon { width: 16px; flex-shrink: 0; font-size: 11px; padding-top: 2px; }
+.icon-red{color:var(--red)} .icon-orange{color:var(--orange)} .icon-green{color:var(--green)}
+.insight-title { font-size: 13px; font-weight: 500; flex: 1; line-height: 1.4; }
+.insight-summary { font-size: 12px; font-weight: 400; }
+.s-red{color:var(--red)} .s-orange{color:var(--orange)} .s-green{color:var(--green)}
+.chevron { color: var(--muted); font-size: 11px; transition: transform .2s; flex-shrink: 0; padding-top: 3px; }
+.chevron.open { transform: rotate(180deg); }
+.insight-body { display: none; padding: 0 18px 14px 44px; font-size: 13px; line-height: 1.75; color: #4a5568; }
+.insight-body.open { display: block; }
+
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.sp-card { padding: 18px; }
+.sp-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.sp-sub { font-size: 11px; color: var(--muted); margin-bottom: 14px; line-height: 1.4; }
+.sp-stats { display: flex; gap: 8px; margin-bottom: 14px; }
+.sp-stat { flex: 1; background: #f8f9fc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+.sp-stat-label { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.sp-stat-value { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.good{color:var(--green)} .warn{color:var(--orange)} .danger{color:var(--red)}
+.sp-bar-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+.sp-bar-wrap { height: 28px; background: #f1f5f9; border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 12px; }
+.sp-seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; overflow: hidden; white-space: nowrap; }
+.sp-legend { display: flex; flex-direction: column; gap: 5px; }
+.sp-leg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; }
+.sp-leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.sp-leg-label { flex: 1; color: var(--muted); }
+.sp-leg-pct { font-family: 'Courier New', monospace; font-weight: 600; color: var(--text); min-width: 38px; text-align: right; }
+.sp-leg-usd { font-family: 'Courier New', monospace; font-size: 10px; color: var(--muted); min-width: 60px; text-align: right; }
+.sp-note { margin-top: 12px; font-size: 10px; color: var(--muted); line-height: 1.55; border-top: 1px solid var(--border); padding-top: 10px; }
+
+.sim-card { padding: 18px; }
+.sim-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.sim-sub { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+.chart-wrap { background: #0d1117; border-radius: 8px; padding: 14px; }
+
+.assumptions { margin-top: 14px; padding: 12px 16px; background: #ebf4ff; border: 1px solid #bee3f8; border-radius: 8px; font-size: 12px; color: #2c5282; line-height: 1.65; }
+.assumptions strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<div class="page">
+
+<h1 class="page-title">Tokenomics Test: <span>$REX</span> | RexHook</h1>
+<div class="badge-row">
+  <span class="badge badge-green">✓ 24m Investor Cliff: Strongest In Series</span>
+  <span class="badge badge-green">✓ $30M FDV Conservative for Uniswap V4 Infra</span>
+  <span class="badge badge-green">✓ TGE Sell Pressure Only $363K vs $2.25M Liquidity</span>
+  <span class="badge badge-orange">⚠ 79% Year-1 Inflation, 76% Year-2</span>
+  <span class="badge badge-orange">⚠ Team Cliff Expiry at M13: 20M Tokens in One Month</span>
+  <span class="badge badge-pink">Uniswap V4 Infrastructure · EVM · 1B Supply · $2.3M Raise</span>
+</div>
+<p class="page-subtitle">RexHook · Programmable Liquidity Infrastructure for Uniswap V4 · Unified hook registry, certification system, marketplace, launchpad, and trading terminal · 23,000+ hooks across 15 chains · $23M+ already lost to exploits · Audit Date: April 2026</p>
+
+<div class="top-row">
+  <!-- Gauge: score=64.4, blue, dashoffset=251.2*(1-0.644)=89.4 -->
+  <div class="card score-card">
+    <div class="score-title">Tokenomics Rating</div>
+    <div class="gauge-wrap">
+      <svg viewBox="0 0 170 95" width="170" height="95">
+        <defs><linearGradient id="ggrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#1a56db"/>
+          <stop offset="100%" style="stop-color:#6b9eff"/>
+        </linearGradient></defs>
+        <path d="M 5 88 A 80 80 0 0 1 165 88" fill="none" stroke="#e8efff" stroke-width="12" stroke-linecap="round"/>
+        <path d="M 5 88 A 80 80 0 0 1 165 88" fill="none" stroke="url(#ggrad)" stroke-width="12" stroke-linecap="round"
+          stroke-dasharray="251.2" stroke-dashoffset="89.4"/>
+      </svg>
+      <div class="gauge-score">
+        <span class="gauge-number">64<sup>.4</sup></span>
+        <div class="rating-badge">A-</div>
+      </div>
+    </div>
+    <div class="gauge-labels"><span>0</span><span>100</span></div>
+  </div>
+
+  <div class="card radar-card">
+    <svg id="radarSvg" viewBox="0 0 340 270" width="100%" height="270" style="max-width:340px"></svg>
+  </div>
+
+  <div class="card" style="padding:16px 14px;display:flex;flex-direction:column;gap:6px;justify-content:center;">
+    <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Token Allocation</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;"><span style="width:8px;height:8px;border-radius:50%;background:#1a56db;flex-shrink:0"></span><span style="color:var(--muted)">Community</span><span style="font-family:'Courier New',monospace;font-weight:700;margin-left:auto">20.0%</span></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;flex-shrink:0"></span><span style="color:var(--muted)">Seed+Private</span><span style="font-family:'Courier New',monospace;font-weight:700;margin-left:auto">20.2%</span></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;"><span style="width:8px;height:8px;border-radius:50%;background:#7c3aed;flex-shrink:0"></span><span style="color:var(--muted)">Team</span><span style="font-family:'Courier New',monospace;font-weight:700;margin-left:auto">16.0%</span></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;"><span style="width:8px;height:8px;border-radius:50%;background:#38a169;flex-shrink:0"></span><span style="color:var(--muted)">Ecosystem</span><span style="font-family:'Courier New',monospace;font-weight:700;margin-left:auto">15.0%</span></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;"><span style="width:8px;height:8px;border-radius:50%;background:#0ea5e9;flex-shrink:0"></span><span style="color:var(--muted)">Protocol Res.</span><span style="font-family:'Courier New',monospace;font-weight:700;margin-left:auto">12.0%</span></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;"><span style="width:8px;height:8px;border-radius:50%;background:#e53e3e;flex-shrink:0"></span><span style="color:var(--muted)">Adv+Marketing</span><span style="font-family:'Courier New',monospace;font-weight:700;margin-left:auto">9.3%</span></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;"><span style="width:8px;height:8px;border-radius:50%;background:#38bdf8;flex-shrink:0"></span><span style="color:var(--muted)">Liquidity</span><span style="font-family:'Courier New',monospace;font-weight:700;margin-left:auto">7.5%</span></div>
+    </div>
+    <div style="margin-top:6px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);">1,000,000,000 $REX · Fixed supply · TGE $0.03 · FDV $30M</div>
+  </div>
+</div>
+
+<!-- Unlock bar -->
+<div class="card unlock-card">
+  <div class="unlock-title">Cumulative Unlock Schedule, Total Supply 1,000,000,000 $REX · TGE: $0.03 · FDV: $30M</div>
+  <div id="unlockBar" class="unlock-bar-wrap"></div>
+  <div class="unlock-bar-labels">
+    <span>TGE 17.6%</span><span>M12 31.5% (Team cliff)</span><span>M24 55.5% (Investors unlock)</span><span>M36 97.7%</span><span>M48 100%</span>
+  </div>
+  <div class="unlock-legend">
+    <div class="ul-item"><div class="ul-dot" style="background:#f59e0b"></div>Seed+Private 20.2% (5% TGE, 24m cliff, 3m vest), cliff M25</div>
+    <div class="ul-item"><div class="ul-dot" style="background:#7c3aed"></div>Team 16% (0% TGE, 12m cliff, 36m vest), starts M13</div>
+    <div class="ul-item"><div class="ul-dot" style="background:#38a169"></div>Ecosystem 15% (2% TGE, 0m cliff, 36m linear)</div>
+    <div class="ul-item"><div class="ul-dot" style="background:#0ea5e9"></div>Protocol Reserve 12% (0% TGE, 6m cliff, 48m daily)</div>
+    <div class="ul-item"><div class="ul-dot" style="background:#1a56db"></div>Community Rewards 20% (2% TGE, 0m cliff, 36m linear)</div>
+    <div class="ul-item"><div class="ul-dot" style="background:#38bdf8"></div>Liquidity 7.5% (100% TGE)</div>
+  </div>
+</div>
+
+<!-- Score pills -->
+<div class="scores-row">
+  <div class="score-pill"><div class="score-pill-label">Distribution Fairness</div><div class="score-pill-value c-green">62.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Monetary Policy</div><div class="score-pill-value c-orange">48.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Investor Conditions</div><div class="score-pill-value c-green">72.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Valuation &amp; VDV</div><div class="score-pill-value c-green">68.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Listing &amp; Liquidity</div><div class="score-pill-value c-green">70.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Utility &amp; Value Flow</div><div class="score-pill-value c-green">75.0</div></div>
+</div>
+
+<!-- INSIGHTS -->
+<div class="section-label">INSIGHTS</div>
+<div class="card insights-card">
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-red">▲</div>
+      <div class="insight-title">79% Year-1 Inflation Sustained Through Year 3: Consistent Supply Expansion Across All Three Years<span class="insight-summary s-red">: circulating supply triples from 176M to 555M by month 24 despite low TGE float</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">RexHook's inflation profile is unusually consistent: 79% in year 1, 76% in year 2, and 76% in year 3. Unlike most projects that front-load supply unlocks, RexHook spreads its inflation evenly because three large buckets vest simultaneously over 36 months from different start dates: Community Rewards (200M, no cliff, 36m vest), Ecosystem (150M, no cliff, 36m vest), and Team (160M, 12m cliff, 36m vest from M13). These three buckets together account for 510M tokens distributed over a 48-month window. The practical effect is that circulating supply goes from 176M at TGE to 315M at M12, to 555M at M24, to 977M at M36. While steady inflation is preferable to cliff-driven spikes, three consecutive years of 76-79% annual supply growth requires sustained protocol revenue and fee capture to keep price stable. The Community Rewards and Ecosystem allocations vesting from day zero are the primary drivers in years 1-2.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-red">▲</div>
+      <div class="insight-title">Month-13 Team Cliff Event: 20M Tokens Added in a Single Month<span class="insight-summary s-red">: Team's 12m cliff expiry is the sharpest single-month supply jump in the entire schedule</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">At month 12, Team tokens complete their cliff period. At month 13, linear vesting begins: 160M tokens over 36 months equals 4.44M tokens per month. But the spreadsheet shows month 12 to 13 is not just the regular 4.44M, it is 19.96M in a single month. This is because several vesting streams are converging at that exact point, amplifying the jump. Sophisticated market participants will position around this event, typically beginning to short or exit in months 11-12 in anticipation. The team tokens vest at $0.03 with zero cost basis, so even a small percentage selling at market represents meaningful pressure against a $30M FDV. The 36-month vest duration does limit monthly team unlock to a manageable 4.44M tokens ($133K at listing price) for the remainder of the vesting period, but the month-13 inflection point is the key event to monitor.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-orange">■</div>
+      <div class="insight-title">Insider Concentration at 40.5% Needs Context: Team 16% + Investors 20.2%<span class="insight-summary s-orange">: above industry average, partially offset by compressed investor multiples and long cliffs</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">The combined insider allocation (Team 16%, Advisors 4.3%, Seed 10%, Private 10.2%) totals 40.5% of supply. This is above the industry-preferred threshold of 35% and significantly above community-first projects like Drive369 (6.9% team). However, context matters significantly here. The Team's 16% comes with a 12-month cliff and 36-month linear vest, tokens fully distributed by month 48. The Seed and Private investors have a 24-month cliff (the longest in the series), meaning they cannot access the bulk of their allocation until November 2028 at TGE. The community-facing allocations (Community Rewards 20%, Ecosystem 15%) total 35%, which is respectable for an infrastructure protocol. The critical question is whether the 16% team allocation is concentrated in a few founders or distributed across a larger engineering and operations team, which the spreadsheet does not disclose.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-green">✓</div>
+      <div class="insight-title">24-Month Investor Cliff Is the Best Investor Protection in the Audit Series<span class="insight-summary s-green">: Seed and Private investors cannot vest the bulk of tokens until month 25, June 2028</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">The Seed (10%, $0.0108) and Private (10.2%, $0.012) rounds have a 24-month cliff followed by only 3 months of linear vesting. This is the most investor-protective vesting structure seen across all seven projects audited in this series. A 24-month cliff means investors cannot access the bulk of their tokens until two years post-TGE, long enough for the protocol to either prove itself or fail on its own merits. Only 5% of each round unlocks at TGE (5M and 5.1M tokens respectively), keeping day-one investor sell pressure at approximately $303K combined, well within the $2.25M liquidity pool. The compressed multiples (2.78x Seed, 2.5x Private) combined with the 24-month cliff mean investor economic incentives are genuinely aligned with long-term protocol growth rather than short-term listing pump. This is a best-practice structure that significantly reduces the common VC dump risk.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-green">✓</div>
+      <div class="insight-title">TGE Sell Pressure $363K vs $2.25M Liquidity: Strongest Day-One Balance in Series<span class="insight-summary s-green">: estimated sell pressure is only 16% of the liquidity pool on launch day</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">Total estimated TGE day-one sell pressure across all allocations is $363,384 against a liquidity pool of $2,250,000 (75M tokens at $0.03). This 6.2x liquidity coverage ratio is the best in the audit series and reflects the combination of: minimal TGE unlocks across most allocations (team 0%, protocol reserve 0%, investors only 5%), compressed investor multiples reducing profit-taking incentive, and a meaningful liquidity allocation at 7.5% of total supply. The $2.25M DEX liquidity provides genuine price stability for the initial trading weeks. Community Rewards and Ecosystem tokens at TGE contribute only $69,660 in estimated sell pressure combined due to their low sell propensity and small TGE percentages. The only meaningful TGE sellers are the Seed and Private investors with $190,284 combined, manageable at this liquidity depth.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-green">✓</div>
+      <div class="insight-title">$30M FDV Is Conservative for Uniswap V4 Infrastructure With Multi-Revenue Streams<span class="insight-summary s-green">: $3M IMC at TGE gives genuine price discovery runway against a credible market opportunity</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">At $0.03 per token with 1B total supply, the listing FDV is $30M and the initial market cap (including liquidity) is approximately $3.04M. For a protocol sitting at the infrastructure layer of Uniswap V4, which processes over $3T in annual DEX volume, this is an exceptionally conservative valuation. Comparable Uniswap ecosystem infrastructure plays have listed at FDVs ranging from $80M to $500M. RexHook's three distinct revenue streams (transaction fees, marketplace activity, and SaaS-style certification fees at ~90% margin) create a plausible path to revenue that justifies even a small fraction of that FDV range. The $2.3M total raise against a $30M FDV gives a 13x FDV/raise multiple, lean enough that the protocol is not saddled with excessive investor capital obligations. If hook adoption on Uniswap V4 follows the trajectory that DEX volume followed on V3, $30M FDV will appear very modest in retrospect.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-green">✓</div>
+      <div class="insight-title">Protocol Has Genuine Product-Market Fit Signal: $23M Lost to Hook Exploits Creates Real Demand<span class="insight-summary s-green">: 23,000+ hooks deployed, no trust layer exists, and the problem is demonstrably costly</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">Most early-stage DeFi infrastructure projects audit a hypothetical market. RexHook audits a market that has already proven it exists and is suffering without the solution. With 23,000+ hooks deployed across 15 chains and $23M already lost to exploits, the certification and trust-layer products are not speculative, they address a documented, quantifiable pain point. The SaaS certification revenue model (~90% margin) is particularly compelling: hook developers have strong incentive to pay for certification to attract liquidity, and LPs have strong incentive to only interact with certified hooks. This creates a bilateral marketplace dynamic where both sides generate fee revenue. The trading terminal routing volume through hook-aware liquidity adds a third revenue stream that scales directly with Uniswap V4 volume. The utility score of 75 reflects that $REX is genuinely required across multiple protocol functions, not an optional governance layer bolted onto an existing protocol.</div>
+  </div>
+
+</div>
+
+<!-- BOTTOM ROW -->
+<div class="section-label">TGE SELL PRESSURE &amp; PRICE SIMULATION</div>
+<div class="bottom-row">
+
+  <div class="card sp-card">
+    <div class="sp-title">TGE Day Sell Pressure Estimate</div>
+    <div class="sp-sub">Propensity model · Listing $0.03 · FDV $30M · Utility score 75/100</div>
+    <div class="sp-stats">
+      <div class="sp-stat"><div class="sp-stat-label">TGE Float</div><div class="sp-stat-value warn">176M (17.6%)</div></div>
+      <div class="sp-stat"><div class="sp-stat-label">TGE MCAP</div><div class="sp-stat-value good">$3.04M</div></div>
+      <div class="sp-stat"><div class="sp-stat-label">Sell Pressure</div><div class="sp-stat-value good">$363K</div></div>
+      <div class="sp-stat"><div class="sp-stat-label">Liquidity</div><div class="sp-stat-value good">$2.25M</div></div>
+    </div>
+    <div class="sp-bar-label">USD Sell Contribution by Allocation</div>
+    <div class="sp-bar-wrap" id="spBar"></div>
+    <div class="sp-legend" id="spLegend"></div>
+    <div class="sp-note">
+      <strong>Method:</strong> propensity = max &minus; (utility/100) &times; (max &minus; min). Liquidity, Team, Protocol Reserve excluded (0 TGE). Estimated sell pressure of $363K is only 16% of the $2.25M liquidity pool, giving the strongest launch-day coverage ratio in this audit series.
+    </div>
+  </div>
+
+  <div class="card sim-card">
+    <div class="sim-title">6-Month Post-Listing Price Simulation</div>
+    <div class="sim-sub">Deterministic model based on vesting events, inflation, and utility score. Not a prediction.</div>
+    <div class="chart-wrap">
+      <canvas id="priceChart" height="200"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<div class="assumptions">
+  <strong>Audit Notes:</strong> Token: $REX. Chain: EVM. Total supply: <strong>1,000,000,000</strong>. TGE price: <strong>$0.03</strong>. FDV: <strong>$30,000,000</strong>. IMC excl. liquidity: $792,000. IMC incl. liquidity: $3,042,000. Total raised: <strong>$2,304,000</strong> (Seed $1.08M at $0.0108, Private $1.224M at $0.012). TGE circulating (excl. liq): 26.4M (2.64%). TGE circulating (incl. liq): 101.4M (10.14%). Investor cliff: 24 months (both rounds). Vesting: Seed/Private 3m linear post-cliff, Team 12m cliff + 36m vest, Advisors 6m cliff + 24m vest, Protocol Reserve 6m cliff + 48m daily, Ecosystem 36m linear, Community Rewards 36m linear, Marketing 11m cliff + 24m vest. Year-1 inflation: 78.8%. Year-2 inflation: 75.9%. Year-3 inflation: 76.0%. Project context: Uniswap V4 hook infrastructure, registry, certification, marketplace, trading terminal. Three revenue streams: transaction fees, marketplace, SaaS certification (~90% margin). Source: RexHook_Tokenomics___.xlsx. Confidence: <strong>High</strong>.
+</div>
+</div>
+
+<script>
+// ── Radar ─────────────────────────────────────────────────────────────────────
+(function(){
+  const svg=document.getElementById('radarSvg'),ns='http://www.w3.org/2000/svg';
+  const cx=170,cy=138,maxR=90,n=5;
+  const labels=['Monetary\nPolicy','Utility &\nValue Flow','Investor\nConditions','Distribution\nFairness','Listing &\nValuation'];
+  const scores=[48,75,72,62,69];
+  function pt(i,r){const a=(Math.PI*2*i/n)-Math.PI/2;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+  [25,50,75,100].forEach(p=>{
+    const el=document.createElementNS(ns,'polygon');
+    el.setAttribute('points',Array.from({length:n},(_,i)=>pt(i,maxR*p/100).join(',')).join(' '));
+    el.setAttribute('fill','none');el.setAttribute('stroke','rgba(0,0,0,0.07)');el.setAttribute('stroke-width','1');
+    svg.appendChild(el);
+  });
+  for(let i=0;i<n;i++){
+    const[x2,y2]=pt(i,maxR);
+    const l=document.createElementNS(ns,'line');
+    l.setAttribute('x1',cx);l.setAttribute('y1',cy);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+    l.setAttribute('stroke','rgba(0,0,0,0.08)');l.setAttribute('stroke-width','1');
+    svg.appendChild(l);
+  }
+  const dp=document.createElementNS(ns,'polygon');
+  dp.setAttribute('points',scores.map((s,i)=>pt(i,maxR*s/100).join(',')).join(' '));
+  dp.setAttribute('fill','rgba(26,86,219,0.14)');dp.setAttribute('stroke','rgba(26,86,219,0.65)');dp.setAttribute('stroke-width','2');
+  svg.appendChild(dp);
+  scores.forEach((s,i)=>{
+    const[px,py]=pt(i,maxR*s/100);
+    const c=document.createElementNS(ns,'circle');
+    c.setAttribute('cx',px);c.setAttribute('cy',py);c.setAttribute('r','4');
+    c.setAttribute('fill','rgba(26,86,219,0.9)');svg.appendChild(c);
+  });
+  labels.forEach((lbl,i)=>{
+    const angle=(Math.PI*2*i/n)-Math.PI/2;
+    const lx=cx+(maxR+32)*Math.cos(angle),ly=cy+(maxR+32)*Math.sin(angle);
+    const lines=lbl.split('\n');
+    const anchor=Math.cos(angle)>0.3?'start':Math.cos(angle)<-0.3?'end':'middle';
+    const t=document.createElementNS(ns,'text');
+    t.setAttribute('x',lx);t.setAttribute('y',ly);
+    t.setAttribute('text-anchor',anchor);t.setAttribute('dominant-baseline','middle');
+    t.setAttribute('font-size','10');t.setAttribute('font-family','-apple-system,sans-serif');
+    t.setAttribute('font-weight','500');t.setAttribute('fill','#4a5568');
+    lines.forEach((line,li)=>{
+      const ts=document.createElementNS(ns,'tspan');
+      ts.setAttribute('x',lx);ts.setAttribute('dy',li===0?(lines.length>1?'-0.6em':'0'):'1.3em');
+      ts.textContent=line;t.appendChild(ts);
+    });
+    svg.appendChild(t);
+    const[sx,sy]=pt(i,maxR*scores[i]/100);
+    const st=document.createElementNS(ns,'text');
+    st.setAttribute('x',sx+Math.cos(angle)*13);st.setAttribute('y',sy+Math.sin(angle)*13);
+    st.setAttribute('text-anchor',anchor);st.setAttribute('dominant-baseline','middle');
+    st.setAttribute('font-size','9');st.setAttribute('font-family','Courier New,monospace');
+    st.setAttribute('font-weight','700');st.setAttribute('fill','#1a56db');
+    st.textContent=scores[i];svg.appendChild(st);
+  });
+})();
+
+// ── Unlock bar ─────────────────────────────────────────────────────────────────
+(function(){
+  const container=document.getElementById('unlockBar');
+  const segs=[
+    {name:'Seed+Private',     total:20.2,  tge:1.01, col:'#f59e0b'},
+    {name:'Team',             total:16.0,  tge:0,    col:'#7c3aed'},
+    {name:'Advisors',         total:4.3,   tge:0.43, col:'#e53e3e'},
+    {name:'Protocol Reserve', total:12.0,  tge:0,    col:'#0ea5e9'},
+    {name:'Ecosystem',        total:15.0,  tge:0.30, col:'#38a169'},
+    {name:'Liquidity',        total:7.5,   tge:7.5,  col:'#38bdf8'},
+    {name:'Marketing',        total:5.0,   tge:0.50, col:'#fb923c'},
+    {name:'Community',        total:20.0,  tge:0.40, col:'#1a56db'},
+  ];
+  let left=0;
+  segs.forEach(s=>{
+    if(s.tge>0){
+      const seg=document.createElement('div');
+      seg.className='unlock-segment';
+      seg.style.cssText=`left:${left}%;width:${s.tge}%;background:${s.col}`;
+      seg.title=`${s.name}: ${s.tge.toFixed(1)}% at TGE`;
+      if(s.tge>=4)seg.textContent=s.tge.toFixed(1)+'%';
+      container.appendChild(seg);
+    }
+    const locked=s.total-s.tge;
+    if(locked>0){
+      const seg=document.createElement('div');
+      seg.className='unlock-segment';
+      seg.style.cssText=`left:${left+s.tge}%;width:${locked}%;background:${s.col};opacity:0.2`;
+      container.appendChild(seg);
+    }
+    left+=s.total;
+  });
+})();
+
+// ── Sell Pressure ─────────────────────────────────────────────────────────────
+(function(){
+  const data=[
+    {name:'Seed Investors',    pct:25.9, usd:94200,  col:'#f59e0b'},
+    {name:'Private Investors', pct:26.5, usd:96084,  col:'#fb923c'},
+    {name:'Marketing',         pct:12.1, usd:44100,  col:'#dd6b20'},
+    {name:'Community Rewards', pct:11.9, usd:43200,  col:'#1a56db'},
+    {name:'Advisors',          pct:16.3, usd:59340,  col:'#e53e3e'},
+    {name:'Ecosystem',         pct:7.3,  usd:26460,  col:'#38a169'},
+  ];
+  const bar=document.getElementById('spBar');
+  const legend=document.getElementById('spLegend');
+  data.forEach(d=>{
+    const seg=document.createElement('div');
+    seg.className='sp-seg';
+    seg.style.cssText=`width:${d.pct}%;background:${d.col}`;
+    if(d.pct>=12)seg.textContent=d.pct.toFixed(0)+'%';
+    bar.appendChild(seg);
+    const item=document.createElement('div');
+    item.className='sp-leg-item';
+    item.innerHTML=`<div class="sp-leg-dot" style="background:${d.col}"></div><span class="sp-leg-label">${d.name}</span><span class="sp-leg-pct">${d.pct.toFixed(0)}%</span><span class="sp-leg-usd">$${(d.usd/1000).toFixed(0)}K</span>`;
+    legend.appendChild(item);
+  });
+})();
+
+// ── Price Simulation ──────────────────────────────────────────────────────────
+(function(){
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  const labels = ['TGE','M1','M2','M3','M4','M5','M6'];
+  // Deterministic seed from "RexHook"
+  let seed = 'RexHook'.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  function rand(){seed=(seed*1664525+1013904223)&0xffffffff;return(seed>>>0)/4294967296;}
+
+  // Bull scenario: low sell pressure + good utility => upward drift
+  const bull=[1.00];
+  const bear=[1.00];
+  // Unlock events: M1 minor ecosystem, M6 advisors unlock moderate
+  const unlockPressure=[0,0.01,0.01,0.01,0.01,0.02,0.04];
+  for(let i=1;i<7;i++){
+    const up_drift = 0.06 - unlockPressure[i];
+    const dn_drift = -0.04 - unlockPressure[i];
+    const vol = 0.08;
+    bull.push(Math.max(0.5, bull[i-1]*(1+up_drift+(rand()-0.4)*vol)));
+    bear.push(Math.max(0.3, bear[i-1]*(1+dn_drift+(rand()-0.6)*vol)));
+  }
+
+  new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {label:'Bull',data:bull.map(v=>(v*0.03).toFixed(4)),borderColor:'#22c55e',
+         backgroundColor:'rgba(34,197,94,0.05)',tension:0.4,pointRadius:4,
+         pointBackgroundColor:'#22c55e',borderWidth:2},
+        {label:'Bear',data:bear.map(v=>(v*0.03).toFixed(4)),borderColor:'#ef4444',
+         backgroundColor:'rgba(239,68,68,0.05)',tension:0.4,pointRadius:4,
+         pointBackgroundColor:'#ef4444',borderWidth:2},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{
+        legend:{labels:{color:'#94a3b8',font:{size:11}}},
+        tooltip:{
+          callbacks:{label:ctx=>`$${ctx.parsed.y}`}
+        }
+      },
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:10}}},
+        y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:10},
+           callback:v=>`$${parseFloat(v).toFixed(3)}`},
+           title:{display:true,text:'Price (USD)',color:'#64748b',font:{size:10}}}
+      },
+      annotation:{
+        annotations:{
+          m6:{type:'line',xMin:6,xMax:6,borderColor:'rgba(251,191,36,0.5)',
+              borderWidth:1,borderDash:[4,4]}
+        }
+      }
+    }
+  });
+})();
+
+function tog(el){
+  el.querySelector('.insight-body').classList.toggle('open');
+  el.querySelector('.chevron').classList.toggle('open');
+}
+</script>
+</body>
+</html>

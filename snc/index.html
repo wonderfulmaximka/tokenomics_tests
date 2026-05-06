@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tokenomics Test: $SNC | Scandic Coin</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue:#1a56db; --bg:#f8f9fc; --card:#fff; --border:#e2e8f0;
+  --text:#1a202c; --muted:#718096; --red:#e53e3e; --orange:#dd6b20; --green:#38a169;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  background-image: radial-gradient(circle, #c5d3e8 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--text);
+  padding: 28px 24px;
+}
+.page { max-width: 980px; margin: 0 auto; }
+.page-title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+.page-title span { color: var(--orange); }
+.badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 4px 11px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge-red    { background:#fff5f5; border:1px solid #feb2b2; color:#c53030; }
+.badge-orange { background:#fff3cd; border:1px solid #ffd966; color:#7a5800; }
+.badge-blue   { background:#ebf4ff; border:1px solid #bee3f8; color:#2b6cb0; }
+.badge-green  { background:#f0fff4; border:1px solid #9ae6b4; color:#276749; }
+.page-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.section-label { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); padding: 10px 0 8px; }
+
+/* TOP ROW */
+.top-row { display: grid; grid-template-columns: 200px 1fr 280px; gap: 14px; margin-bottom: 14px; }
+.score-card { padding: 20px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.score-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px; }
+.gauge-wrap { position: relative; width: 170px; height: 95px; }
+.gauge-score { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); text-align: center; white-space: nowrap; }
+.gauge-number { font-family: 'Courier New', monospace; font-size: 32px; font-weight: 500; color: #dd6b20; line-height: 1; display: block; }
+.gauge-number sup { font-size: 14px; }
+.rating-badge { display: inline-block; background: #dd6b20; color: white; font-size: 12px; font-weight: 700; padding: 2px 12px; border-radius: 5px; margin-top: 4px; }
+.gauge-labels { display: flex; justify-content: space-between; width: 170px; margin-top: 4px; font-size: 10px; color: var(--muted); font-family: 'Courier New', monospace; }
+.radar-card { padding: 10px; display: flex; align-items: center; justify-content: center; }
+
+/* Allocation grid */
+.alloc-card { padding: 16px 14px; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+.alloc-title { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.alloc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 10px; }
+.alloc-item { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.alloc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.alloc-label { color: var(--muted); }
+.alloc-pct { font-family: 'Courier New', monospace; font-weight: 700; margin-left: auto; }
+.alloc-footer { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); }
+
+/* UNLOCK BAR */
+.unlock-card { padding: 16px 20px; margin-bottom: 14px; }
+.unlock-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+.unlock-bar-wrap { position: relative; height: 32px; background: #f1f5f9; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+.unlock-segment { position: absolute; top: 0; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; overflow: hidden; white-space: nowrap; }
+.unlock-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); }
+.unlock-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; }
+.ul-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); white-space: nowrap; }
+.ul-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* SCORE PILLS */
+.scores-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 14px; }
+.score-pill { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 6px; text-align: center; }
+.score-pill-label { font-size: 9.5px; color: var(--muted); font-weight: 500; line-height: 1.3; margin-bottom: 4px; }
+.score-pill-value { font-family: 'Courier New', monospace; font-size: 16px; font-weight: 500; }
+.c-red{color:var(--red)} .c-orange{color:var(--orange)} .c-green{color:var(--green)} .c-blue{color:var(--blue)}
+
+/* INSIGHTS */
+.insights-card { padding: 0; overflow: hidden; margin-bottom: 14px; }
+.insight-item { border-bottom: 1px solid var(--border); cursor: pointer; }
+.insight-item:last-child { border-bottom: none; }
+.insight-item:hover { background: #fffbf5; }
+.insight-header { display: flex; align-items: flex-start; gap: 10px; padding: 13px 18px; user-select: none; }
+.insight-icon { width: 16px; flex-shrink: 0; font-size: 11px; padding-top: 2px; }
+.icon-red{color:var(--red)} .icon-orange{color:var(--orange)} .icon-green{color:var(--green)}
+.insight-title { font-size: 13px; font-weight: 500; flex: 1; line-height: 1.4; }
+.insight-summary { font-size: 12px; font-weight: 400; }
+.s-red{color:var(--red)} .s-orange{color:var(--orange)} .s-green{color:var(--green)}
+.chevron { color: var(--muted); font-size: 11px; transition: transform .2s; flex-shrink: 0; padding-top: 3px; }
+.chevron.open { transform: rotate(180deg); }
+.insight-body { display: none; padding: 0 18px 14px 44px; font-size: 13px; line-height: 1.75; color: #4a5568; }
+.insight-body.open { display: block; }
+
+/* BOTTOM ROW */
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.sp-card { padding: 18px; }
+.sp-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.sp-sub { font-size: 11px; color: var(--muted); margin-bottom: 14px; line-height: 1.4; }
+.sp-stats { display: flex; gap: 8px; margin-bottom: 14px; }
+.sp-stat { flex: 1; background: #f8f9fc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+.sp-stat-label { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.sp-stat-value { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.good{color:var(--green)} .warn{color:var(--orange)} .danger{color:var(--red)}
+.sp-bar-wrap { height: 28px; background: #f1f5f9; border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 10px; }
+.sp-seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; overflow: hidden; white-space: nowrap; }
+.sp-bar-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+.sp-legend { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.sp-leg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; }
+.sp-leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.sp-leg-label { flex: 1; color: var(--muted); }
+.sp-leg-val { font-family: 'Courier New', monospace; font-weight: 600; color: var(--text); }
+.sp-note { font-size: 10px; color: var(--muted); line-height: 1.55; border-top: 1px solid var(--border); padding-top: 10px; }
+.sim-card { padding: 18px; }
+.sim-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.sim-sub { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.chart-wrap { background: #0d1117; border-radius: 8px; padding: 14px; }
+
+.assumptions { margin-top: 14px; padding: 12px 16px; background: #fff3cd; border: 1px solid #ffd966; border-radius: 8px; font-size: 12px; color: #7a5800; line-height: 1.65; }
+.assumptions strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1 class="page-title">Tokenomics Test: <span>$SNC</span> | Scandic Coin</h1>
+<div class="badge-row">
+  <span class="badge badge-red">⚠ Month-16 Team Cliff: 150M Tokens, +333% Supply Shock</span>
+  <span class="badge badge-red">⚠ $50K Liquidity Against $450K MCAP: Extreme Fragility</span>
+  <span class="badge badge-red">⚠ Staking Yield Formation Undefined: No APY, No Rate, No Pool Size</span>
+  <span class="badge badge-orange">⚠ Utility Set-Up Generates Minimal Organic Buy Pressure</span>
+  <span class="badge badge-blue">Ethereum ERC-20 · 1B Supply · TGE Q2 2026 · RWA/Luxury</span>
+</div>
+<p class="page-subtitle">Scandic Coin (SNC) · SCANDIC FINANCE GROUP LIMITED · Utility token for travel, finance, mobility and lifestyle services across SCANDIC ecosystem brands (FLY, PAY, CARS, ESTATE, YACHTS, DATA, HEALTH) · CertiK audited · Legal entity: Hong Kong · Issuer MiCA/VARA compliant · Audit Date: May 2026</p>
+
+<div class="top-row">
+  <!-- Gauge: score=41.6, dashoffset=251.2*(1-0.416)=146.7 -->
+  <div class="card score-card">
+    <div class="score-title">Tokenomics Rating</div>
+    <div class="gauge-wrap">
+      <svg viewBox="0 0 170 95" width="170" height="95">
+        <defs><linearGradient id="ggrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#c05621"/>
+          <stop offset="100%" style="stop-color:#dd6b20"/>
+        </linearGradient></defs>
+        <path d="M 5 88 A 80 80 0 0 1 165 88" fill="none" stroke="#e8efff" stroke-width="12" stroke-linecap="round"/>
+        <path d="M 5 88 A 80 80 0 0 1 165 88" fill="none" stroke="url(#ggrad)" stroke-width="12" stroke-linecap="round"
+          stroke-dasharray="251.2" stroke-dashoffset="146.7"/>
+      </svg>
+      <div class="gauge-score">
+        <span class="gauge-number">41<sup>.6</sup></span>
+        <div class="rating-badge">BB+</div>
+      </div>
+    </div>
+    <div class="gauge-labels"><span>0</span><span>100</span></div>
+  </div>
+
+  <div class="card radar-card">
+    <svg id="radarSvg" viewBox="0 0 340 270" width="100%" height="270" style="max-width:340px"></svg>
+  </div>
+
+  <div class="card alloc-card">
+    <div class="alloc-title">Token Allocation</div>
+    <div class="alloc-grid">
+      <div class="alloc-item"><span class="alloc-dot" style="background:#38bdf8"></span><span class="alloc-label">Reserved Stock</span><span class="alloc-pct">40.0%</span></div>
+      <div class="alloc-item"><span class="alloc-dot" style="background:#9945ff"></span><span class="alloc-label">Public + Mktg</span><span class="alloc-pct">30.0%</span></div>
+      <div class="alloc-item"><span class="alloc-dot" style="background:#7c3aed"></span><span class="alloc-label">Team + Advisors</span><span class="alloc-pct">15.0%</span></div>
+      <div class="alloc-item"><span class="alloc-dot" style="background:#38a169"></span><span class="alloc-label">Ecosystem Dev</span><span class="alloc-pct">15.0%</span></div>
+    </div>
+    <div style="margin-top:8px;padding:6px 8px;background:#fff5f5;border-radius:6px;font-size:10px;color:#c53030;font-weight:600;">⚠ Whitepaper also states 50% for investment rounds, internal contradiction unresolved</div>
+    <div class="alloc-footer">1,000,000,000 SNC · $0.02 listing · FDV $20M</div>
+  </div>
+</div>
+
+<!-- Unlock bar -->
+<div class="card unlock-card">
+  <div class="unlock-title">Cumulative Unlock Schedule, Total Supply 1,000,000,000 $SNC · TGE Q2 2026</div>
+  <div id="unlockBar" class="unlock-bar-wrap"></div>
+  <div class="unlock-bar-labels">
+    <span>TGE: 2.25%</span><span>M6: 2.85%</span><span>M12: 4.5%</span><span>M16: 19.5% ⚠ TEAM CLIFF</span><span>M24: 35%</span>
+  </div>
+  <div class="unlock-legend">
+    <div class="ul-item"><div class="ul-dot" style="background:#e53e3e"></div>Private investors: TGE unlock, M1-6 further, M12 tranche</div>
+    <div class="ul-item"><div class="ul-dot" style="background:#7c3aed"></div>Team + Advisors 15% (16m full lockup, then 24m linear), cliff event M16</div>
+    <div class="ul-item"><div class="ul-dot" style="background:#38a169"></div>Ecosystem + ongoing vesting to M24+</div>
+    <div class="ul-item"><div class="ul-dot" style="background:#38bdf8"></div>Reserved stock + public sale (schedule not fully disclosed)</div>
+    <div class="ul-item"><div class="ul-dot" style="background:#f43f5e;font-size:10px"></div>⚠ Month-16 single event: +150,000,000 tokens (+333% supply expansion)</div>
+  </div>
+</div>
+
+<!-- Score pills -->
+<div class="scores-row">
+  <div class="score-pill"><div class="score-pill-label">Distribution Fairness</div><div class="score-pill-value c-orange">38.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Monetary Policy</div><div class="score-pill-value c-red">32.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Investor Conditions</div><div class="score-pill-value c-orange">45.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Valuation &amp; VDV</div><div class="score-pill-value c-orange">48.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Listing &amp; Liquidity</div><div class="score-pill-value c-orange">40.0</div></div>
+  <div class="score-pill"><div class="score-pill-label">Utility &amp; Value Flow</div><div class="score-pill-value c-green">52.0</div></div>
+</div>
+
+<!-- INSIGHTS -->
+<div class="section-label">INSIGHTS</div>
+<div class="card insights-card">
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-red">▲</div>
+      <div class="insight-title">Month-16 Team Cliff: 150M Tokens, a 333% Supply Shock in a Single Event<span class="insight-summary s-red">: circulating supply jumps from 45M to 195M in one cliff expiry, the most dangerous event in the schedule</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">The team and advisor allocation (15% = 150,000,000 tokens) is subject to a 16-month full lockup followed by 24-month linear vesting. The cliff expiry at month 16 post-TGE is structurally the most dangerous event in the entire unlock schedule. At that point, circulating supply leaps from 45,000,000 to 195,000,000, a 333% increase in effective supply relative to the pre-cliff float. At the listing price of $0.02, this represents $3,000,000 in potential team sell pressure entering a market that had only $450,000 in initial market cap and $50,000 in provisioned liquidity. Even if only 10% of team tokens are sold at market, that is $300,000 of sell pressure against what is likely still a thin order book. The market maker's own spreadsheet explicitly flags this as a "CRITICAL" risk period. Any trader aware of this schedule will begin positioning short from month 14 onward, creating a self-fulfilling sell-side dynamic before the cliff formally expires.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-red">▲</div>
+      <div class="insight-title">$50K Liquidity Against a $450K MCAP Is Critically Thin<span class="insight-summary s-red">: a single $10K sell order can move price by 20%; the market maker strategy relies on volume it hasn't generated</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">The market maker strategy document specifies $50,000 USDT as the initial liquidity alongside 2.5 million SNC tokens at the TGE price of $0.02. Against an initial market cap of $450,000, the liquidity ratio is approximately 11%, low even by micro-cap standards. The document targets $250,000 in average daily volume in month 1, which is 5x the total liquidity provisioned. Generating that volume without genuine organic demand would require artificial wash trading, which itself is a market manipulation risk. The order book depth target of $50,000 at ±2% is insufficient to absorb any meaningful institutional or OTC buyer entering the market. A single whale-sized $10,000 sell order would move price by approximately 20% at this depth. The buyback safety wall at $0.018 provides some floor protection but only if the issuer maintains it continuously, which is operationally dependent on treasury funding.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-red">▲</div>
+      <div class="insight-title">Staking Module Exists on Paper But Has No Defined Economics: No APY, No Pool Size, No Emission Rate<span class="insight-summary s-red">: the staking contract is described in the whitepaper but zero quantitative parameters are provided</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">The whitepaper describes a Staking Module that "allows users to deposit tokens in exchange for a reward" and explicitly positions staking as a mechanism to absorb token supply and reduce sell pressure. This is directly relevant to the M16 team cliff risk, since staking lockup is one of the few mechanisms that could keep tokens off the market during high-inflation periods. However, not a single quantitative parameter is disclosed: no APY range, no total staking reward pool size, no emission rate for staking rewards, no lock-up period required to earn rewards, and no minimum stake threshold. The whitepaper only adds that "the reward system does not use excessive privileges" and is "lean." This is insufficient for any investor to model staking participation rates or assess how much of the circulating supply the staking module can realistically absorb. Without these parameters, staking cannot be underwritten as a genuine deflationary or sell-pressure-reduction mechanism. It is a feature that exists in the smart contract code but has no published economic model behind it.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-red">▲</div>
+      <div class="insight-title">Token Utility Structure Generates No Independent Buy Pressure: Payment Gateway Requires Existing Users<span class="insight-summary s-red">: SNC's current utility set-up is entirely contingent on pre-existing customers, creating a circular demand problem</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">The core utility of SNC is described as a universal payment token across eight branded verticals: FLY, PAY, CARS, ESTATE, YACHTS, DATA, HEALTH, and DEV. This is a legitimate utility category, but the economic structure of this model creates a fundamental buy-pressure problem. For SNC to generate organic token demand, a customer must first become a Scandic ecosystem client, then choose to pay in SNC rather than fiat, then acquire SNC from the market to do so. Each step in this chain is a conversion drop-off. The customer base for Scandic's services is a luxury clientele that is primarily fiat-native and has no structural reason to acquire SNC ahead of a transaction. There is no speculative demand mechanism that pulls in buyers independent of service consumption: no yield-bearing staking (APY rates are entirely undisclosed), no protocol fee buyback into the token, no revenue-funded treasury with governance rights over yield distribution. The governance function is described as "in the planning stage but not activated at the time of issuance." In tokenomics terms, SNC currently has consumption utility but not investment utility, meaning buy demand can only come from service users, not from investors seeking yield or governance leverage. This is a structurally weak demand foundation for a token facing 333% supply expansion at M16.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-orange">■</div>
+      <div class="insight-title">2.25% TGE Float Is Below the Optimal Range and Opens Manipulation Risk<span class="insight-summary s-orange">: 22.5M tokens at $0.02 = $450K MCAP, far too small for genuine price discovery</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">The TGE circulating supply of 22,500,000 tokens (2.25% of total) is below the 3-5% floor considered minimal for legitimate price discovery. While a low float can protect against early dump pressure, at this extreme it creates two distinct risks. First, with only $450,000 in market cap at listing, any coordinated buyer can establish an artificial price level with minimal capital, typical of a pump-and-dump setup. Second, the subsequent unlock schedule (slow from M0-M12, then explosive at M16) means buyers at TGE who see the price rise are unaware of the coming 333% supply expansion at month 16. The market maker strategy document appears to be designed to manage this dynamic by establishing upward price momentum ($0.05 target, $0.10 bullish target) before the team cliff hits, which would allow early participants to exit at a profit while later entrants absorb the dilution.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-orange">■</div>
+      <div class="insight-title">Year-1 Inflation 100% From M0 to M12, Then 333% at M16<span class="insight-summary s-orange">: supply doubles in the first year, then nearly quintuples at the team cliff, sustained pressure with no absorption mechanism</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">The unlock schedule produces two distinct inflation waves. The first runs from M0 to M12, during which circulating supply doubles from 22.5M to 45M (100% increase) as private investor tranches and marketing allocations vest incrementally. This is manageable if protocol adoption grows in parallel. The second wave is the M16 cliff event (150M team tokens), which expands circulating supply by 333% from 45M to 195M in a single scheduled event. There is no disclosed mechanism to absorb this supply, no buyback program, no burn schedule tied to revenue, and no staking lock-up that would keep tokens off market. The whitepaper mentions a staking module in the smart contract architecture, but provides no APY rates, staking ratios, or commitment that staking will attract sufficient token lockup to offset the cliff pressure. By month 24, 350M tokens (35%) are in circulation, with the trajectory continuing upward through the full vesting schedule.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-green">✓</div>
+      <div class="insight-title">CertiK Audit and KYC Verification Completed: Smart Contract Security Confirmed<span class="insight-summary s-green">: formal verification, no critical/major issues unresolved, team KYC with quarterly re-assessment</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">The whitepaper confirms that Scandic Coin underwent a CertiK security audit covering both on-chain smart contract code and off-chain corporate structure. CertiK's Skynet report shows no critical or major issues remaining unresolved, and the residual findings have been addressed. The team also completed CertiK's KYC/AML program, which includes video interview with founders, identity and document verification, and OSINT background review. CertiK is a credible and widely-recognized auditor in the blockchain space. The quarterly reassessment of the KYC badge provides ongoing accountability. This is a genuine positive that reduces smart contract exploit risk and establishes baseline team accountability. However, it is important to note that a CertiK audit validates code correctness, not tokenomics design, the structural risks identified in this audit (supply concentration, cliff events, issuer control) are design choices, not code vulnerabilities.</div>
+  </div>
+
+  <div class="insight-item" onclick="tog(this)">
+    <div class="insight-header">
+      <div class="insight-icon icon-green">✓</div>
+      <div class="insight-title">$20M FDV Conservative for a Multi-Brand RWA Ecosystem With 30-Year Operating History<span class="insight-summary s-green">: physical assets (jets, yachts, real estate), MiCA/VARA compliance, and 8 active ecosystem verticals</span></div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="insight-body">At $0.02 per token with 1B total supply, the listing FDV is $20M. For a project claiming 30 years of operating experience across luxury travel, finance, real estate, and mobility verticals, and with physical assets including jets and yachts, this FDV is not obviously inflated. Comparable RWA tokenization projects in the luxury segment have launched at FDVs of $30-100M. The stated compliance with both EU MiCA regulation and Dubai VARA standards, combined with the CertiK audit, establishes a more credible regulatory posture than most projects at this stage. The eight branded business lines (FLY, PAY, CARS, ESTATE, YACHTS, DATA, HEALTH, DEV) provide genuine breadth of utility vectors if even a fraction are operationally deployed to accept SNC. The planned Scandic Pay Wallet and Scandic Crypto Card for Q1 2026 represent concrete product milestones. However, none of the stated revenues or physical asset valuations are independently verified in the whitepaper, and "30 years of experience" in the legacy business does not automatically translate to Web3 product-market fit.</div>
+  </div>
+
+</div>
+
+<!-- BOTTOM ROW -->
+<div class="section-label">SUPPLY SHOCK ANALYSIS &amp; TOKEN ECONOMY</div>
+<div class="bottom-row">
+
+  <div class="card sp-card">
+    <div class="sp-title">Supply Unlock Timeline</div>
+    <div class="sp-sub">From market maker strategy document · Listing $0.02 · FDV $20M · TGE Q2 2026</div>
+    <div class="sp-stats">
+      <div class="sp-stat"><div class="sp-stat-label">TGE Float</div><div class="sp-stat-value danger">22.5M (2.25%)</div></div>
+      <div class="sp-stat"><div class="sp-stat-label">TGE MCAP</div><div class="sp-stat-value warn">$450K</div></div>
+      <div class="sp-stat"><div class="sp-stat-label">Liquidity</div><div class="sp-stat-value danger">$50K</div></div>
+      <div class="sp-stat"><div class="sp-stat-label">M16 Shock</div><div class="sp-stat-value danger">+150M</div></div>
+    </div>
+    <div class="sp-bar-label">Circulating Supply Growth by Period</div>
+    <div class="sp-bar-wrap" id="spBar"></div>
+    <div class="sp-legend" id="spLegend"></div>
+    <div class="sp-note">
+      <strong>Critical event:</strong> At Month 16, the team cliff expires and 150,000,000 tokens enter the vesting schedule simultaneously. This single event represents 333% supply expansion relative to M12 circulating supply. At $0.02, the theoretical sell pressure is $3,000,000 against an order book that was $50,000 at TGE.
+    </div>
+  </div>
+
+  <div class="card sp-card">
+    <div class="sp-title">Token Economy Flow</div>
+    <div class="sp-sub">How $SNC is designed to circulate through the Scandic ecosystem</div>
+    <svg id="flowSvg" viewBox="0 0 420 320" style="width:100%;height:auto"></svg>
+  </div>
+
+</div>
+
+<div class="assumptions">
+  <strong>Audit Notes:</strong> Token: $SNC (ERC-20, Ethereum). Total supply: <strong>1,000,000,000</strong> (stated max, but issuer has mint authority). Listing price: <strong>$0.02 USDT</strong>. FDV: <strong>$20,000,000</strong>. TGE circulating: <strong>22,500,000 (2.25%)</strong>. Initial liquidity provisioned: <strong>$50,000 USDT + 2.5M SNC</strong>. Team vesting: 16-month full lockup, 24-month linear. Month-16 team cliff = +150M tokens (+333% supply expansion). Listing target from market maker doc: $0.05 (+150% from $0.02). Safety buyback wall: $0.018. Private raise: $500K-$1.5M. Staking APY and pool size: not disclosed. Governance: planned, not yet activated. Issuer: SCANDIC FINANCE GROUP LIMITED, Hong Kong. CertiK audit completed (no critical issues). MiCA and VARA compliance stated. Sources: English White Paper v2.0 (May 2026) + Market Maker Strategy xlsx. Confidence: <strong>Medium</strong> (core unlock schedule confirmed from market maker doc; staking yield economics and investor allocation % not fully disclosed).
+</div>
+</div>
+
+<script>
+// ── Radar ─────────────────────────────────────────────────────────────────────
+(function(){
+  const svg=document.getElementById('radarSvg'),ns='http://www.w3.org/2000/svg';
+  const cx=170,cy=138,maxR=90,n=5;
+  const labels=['Monetary\nPolicy','Utility &\nValue Flow','Distribution\nFairness','Listing &\nLiquidity','Investor\nConditions'];
+  const scores=[32,52,38,40,45];
+  function pt(i,r){const a=(Math.PI*2*i/n)-Math.PI/2;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+  [25,50,75,100].forEach(p=>{
+    const el=document.createElementNS(ns,'polygon');
+    el.setAttribute('points',Array.from({length:n},(_,i)=>pt(i,maxR*p/100).join(',')).join(' '));
+    el.setAttribute('fill','none');el.setAttribute('stroke','rgba(0,0,0,0.07)');el.setAttribute('stroke-width','1');
+    svg.appendChild(el);
+  });
+  for(let i=0;i<n;i++){
+    const[x2,y2]=pt(i,maxR);
+    const l=document.createElementNS(ns,'line');
+    l.setAttribute('x1',cx);l.setAttribute('y1',cy);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+    l.setAttribute('stroke','rgba(0,0,0,0.08)');l.setAttribute('stroke-width','1');
+    svg.appendChild(l);
+  }
+  const dp=document.createElementNS(ns,'polygon');
+  dp.setAttribute('points',scores.map((s,i)=>pt(i,maxR*s/100).join(',')).join(' '));
+  dp.setAttribute('fill','rgba(221,107,32,0.15)');dp.setAttribute('stroke','rgba(221,107,32,0.65)');dp.setAttribute('stroke-width','2');
+  svg.appendChild(dp);
+  scores.forEach((s,i)=>{
+    const[px,py]=pt(i,maxR*s/100);
+    const c=document.createElementNS(ns,'circle');
+    c.setAttribute('cx',px);c.setAttribute('cy',py);c.setAttribute('r','4');
+    c.setAttribute('fill','rgba(221,107,32,0.9)');svg.appendChild(c);
+  });
+  labels.forEach((lbl,i)=>{
+    const angle=(Math.PI*2*i/n)-Math.PI/2;
+    const lx=cx+(maxR+32)*Math.cos(angle),ly=cy+(maxR+32)*Math.sin(angle);
+    const lines=lbl.split('\n');
+    const anchor=Math.cos(angle)>0.3?'start':Math.cos(angle)<-0.3?'end':'middle';
+    const t=document.createElementNS(ns,'text');
+    t.setAttribute('x',lx);t.setAttribute('y',ly);
+    t.setAttribute('text-anchor',anchor);t.setAttribute('dominant-baseline','middle');
+    t.setAttribute('font-size','10');t.setAttribute('font-family','-apple-system,sans-serif');
+    t.setAttribute('font-weight','500');t.setAttribute('fill','#4a5568');
+    lines.forEach((line,li)=>{
+      const ts=document.createElementNS(ns,'tspan');
+      ts.setAttribute('x',lx);ts.setAttribute('dy',li===0?(lines.length>1?'-0.6em':'0'):'1.3em');
+      ts.textContent=line;t.appendChild(ts);
+    });
+    svg.appendChild(t);
+    const[sx,sy]=pt(i,maxR*scores[i]/100);
+    const st=document.createElementNS(ns,'text');
+    st.setAttribute('x',sx+Math.cos(angle)*13);st.setAttribute('y',sy+Math.sin(angle)*13);
+    st.setAttribute('text-anchor',anchor);st.setAttribute('dominant-baseline','middle');
+    st.setAttribute('font-size','9');st.setAttribute('font-family','Courier New,monospace');
+    st.setAttribute('font-weight','700');st.setAttribute('fill','#dd6b20');
+    st.textContent=scores[i];svg.appendChild(st);
+  });
+})();
+
+// ── Unlock bar ─────────────────────────────────────────────────────────────────
+(function(){
+  const container=document.getElementById('unlockBar');
+  // Show as timeline bars: each period as % of total supply
+  const segs=[
+    {name:'TGE (2.25%)',     w:2.25,  col:'#e53e3e'},
+    {name:'M1-6 (+0.6%)',    w:0.60,  col:'#f59e0b'},
+    {name:'M7-12 (+1.65%)',  w:1.65,  col:'#fb923c'},
+    {name:'M13-15 (+0%)',    w:2.0,   col:'#e2e8f0'}, // quiet period
+    {name:'M16 CLIFF +15%',  w:15.0,  col:'#c53030'},
+    {name:'M17-24 +15.5%',   w:15.5,  col:'#7c3aed'},
+    {name:'Remaining 63%',   w:63.0,  col:'#38bdf8', opacity:'0.25'},
+  ];
+  let left=0;
+  segs.forEach(s=>{
+    const seg=document.createElement('div');
+    seg.className='unlock-segment';
+    seg.style.cssText=`left:${left}%;width:${s.w}%;background:${s.col};opacity:${s.opacity||1}`;
+    seg.title=s.name;
+    if(s.w>=3&&s.name!=='Remaining 63%')seg.textContent=s.name.split(' ')[0];
+    if(s.name.includes('CLIFF'))seg.textContent='M16 ⚠ CLIFF';
+    container.appendChild(seg);
+    left+=s.w;
+  });
+})();
+
+// ── Supply growth bar ─────────────────────────────────────────────────────────
+(function(){
+  const bar=document.getElementById('spBar');
+  const legend=document.getElementById('spLegend');
+  const data=[
+    {name:'TGE: 22.5M (2.25%)',       w:6.4,  col:'#e53e3e',   val:'$450K MCAP'},
+    {name:'M6: 28.5M (2.85%)',         w:1.7,  col:'#f59e0b',   val:'+$120K'},
+    {name:'M12: 45M (4.5%)',           w:4.7,  col:'#fb923c',   val:'+$330K'},
+    {name:'M16: 195M (19.5%) TEAM',    w:42.9, col:'#c53030',   val:'+$3M SHOCK'},
+    {name:'M24: 350M (35%)',           w:44.3, col:'#7c3aed',   val:'+$3.1M'},
+  ];
+  data.forEach(d=>{
+    const seg=document.createElement('div');
+    seg.className='sp-seg';
+    seg.style.cssText=`width:${d.w}%;background:${d.col}`;
+    seg.title=d.name;
+    if(d.w>=10)seg.textContent=d.name.split(':')[0];
+    bar.appendChild(seg);
+    const item=document.createElement('div');
+    item.className='sp-leg-item';
+    item.innerHTML=`<div class="sp-leg-dot" style="background:${d.col}"></div><span class="sp-leg-label">${d.name}</span><span class="sp-leg-val">${d.val}</span>`;
+    legend.appendChild(item);
+  });
+})();
+
+// ── Token Economy Flow ────────────────────────────────────────────────────────
+(function(){
+  const svg=document.getElementById('flowSvg'),ns='http://www.w3.org/2000/svg';
+  const R=36;
+  const defs=document.createElementNS(ns,'defs');
+  const marker=document.createElementNS(ns,'marker');
+  marker.setAttribute('id','arr2');marker.setAttribute('markerWidth','7');marker.setAttribute('markerHeight','7');
+  marker.setAttribute('refX','6');marker.setAttribute('refY','3');marker.setAttribute('orient','auto');
+  const mp=document.createElementNS(ns,'path');
+  mp.setAttribute('d','M0,0 L0,6 L7,3 z');mp.setAttribute('fill','#b0bec5');
+  marker.appendChild(mp);defs.appendChild(marker);svg.appendChild(defs);
+  const nodes=[
+    {id:'client', x:100,y:50,  label:['Client'],     sub:'buys service',     col:'#1a56db', bg:'#eff6ff'},
+    {id:'brands', x:310,y:50,  label:['Brands'],     sub:'FLY PAY CARS etc', col:'#dd6b20', bg:'#fff7ed'},
+    {id:'snc',    x:210,y:155, label:['$SNC'],       sub:'payment token',    col:'#38a169', bg:'#f0fff4'},
+    {id:'stake',  x:100,y:260, label:['Staking'],    sub:'APY undefined',    col:'#e53e3e', bg:'#fff5f5'},
+    {id:'dao',    x:310,y:260, label:['Governance'], sub:'not yet active',   col:'#718096', bg:'#f8f9fc'},
+    {id:'market', x:210,y:50,  label:['Market'],     sub:'DEX/CEX',          col:'#7c3aed', bg:'#f5f3ff'},
+  ];
+  const edges=[
+    {from:'client',to:'snc',   lbl:'buys SNC'},
+    {from:'snc',   to:'brands',lbl:'pays for services'},
+    {from:'brands',to:'market',lbl:'fiat revenue'},
+    {from:'snc',   to:'stake', lbl:'locks (no yield model)'},
+    {from:'snc',   to:'dao',   lbl:'governance (inactive)'},
+    {from:'market',to:'client',lbl:'price discovery'},
+  ];
+  function nodeById(id){return nodes.find(n=>n.id===id);}
+  edges.forEach(e=>{
+    const s=nodeById(e.from),t=nodeById(e.to);
+    const dx=t.x-s.x,dy=t.y-s.y,len=Math.sqrt(dx*dx+dy*dy);
+    const sx=s.x+dx/len*(R+2),sy=s.y+dy/len*(R+2);
+    const tx=t.x-dx/len*(R+4),ty=t.y-dy/len*(R+4);
+    const mx=(sx+tx)/2,my=(sy+ty)/2;
+    const line=document.createElementNS(ns,'line');
+    line.setAttribute('x1',sx);line.setAttribute('y1',sy);line.setAttribute('x2',tx);line.setAttribute('y2',ty);
+    line.setAttribute('stroke','#b0bec5');line.setAttribute('stroke-width','1.5');
+    line.setAttribute('marker-end','url(#arr2)');svg.appendChild(line);
+    const tw=e.lbl.length*5.2+8;
+    const rect=document.createElementNS(ns,'rect');
+    rect.setAttribute('x',mx-tw/2);rect.setAttribute('y',my-8);
+    rect.setAttribute('width',tw);rect.setAttribute('height',13);
+    rect.setAttribute('rx','3');rect.setAttribute('fill','white');rect.setAttribute('opacity','0.85');
+    svg.appendChild(rect);
+    const lt=document.createElementNS(ns,'text');
+    lt.setAttribute('x',mx);lt.setAttribute('y',my+1);
+    lt.setAttribute('text-anchor','middle');lt.setAttribute('dominant-baseline','middle');
+    lt.setAttribute('font-size','8');lt.setAttribute('font-family','-apple-system,sans-serif');
+    lt.setAttribute('fill','#90a4ae');lt.textContent=e.lbl;svg.appendChild(lt);
+  });
+  nodes.forEach(n=>{
+    const g=document.createElementNS(ns,'g');
+    const circle=document.createElementNS(ns,'circle');
+    circle.setAttribute('cx',n.x);circle.setAttribute('cy',n.y);circle.setAttribute('r',R);
+    circle.setAttribute('fill',n.bg);circle.setAttribute('stroke',n.col);circle.setAttribute('stroke-width','1.5');
+    g.appendChild(circle);
+    const lineH=11,startY=n.y-(n.sub?8:5);
+    n.label.forEach((line,li)=>{
+      const t=document.createElementNS(ns,'text');
+      t.setAttribute('x',n.x);t.setAttribute('y',startY+li*lineH);
+      t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('font-size','9');t.setAttribute('font-family','-apple-system,sans-serif');
+      t.setAttribute('font-weight','700');t.setAttribute('fill',n.col);
+      t.textContent=line;g.appendChild(t);
+    });
+    const ts=document.createElementNS(ns,'text');
+    ts.setAttribute('x',n.x);ts.setAttribute('y',startY+n.label.length*lineH+2);
+    ts.setAttribute('text-anchor','middle');ts.setAttribute('dominant-baseline','middle');
+    ts.setAttribute('font-size','7.5');ts.setAttribute('font-family','-apple-system,sans-serif');
+    ts.setAttribute('fill','#718096');ts.textContent=n.sub;g.appendChild(ts);
+    svg.appendChild(g);
+  });
+})();
+
+function tog(el){
+  el.querySelector('.insight-body').classList.toggle('open');
+  el.querySelector('.chevron').classList.toggle('open');
+}
+</script>
+</body>
+</html>
